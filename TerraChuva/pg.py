@@ -1,0 +1,5 @@
+pgHost = "127.0.0.1"
+pgPort = "5432"
+pgDataBase = "terrama2"
+pgUser = "postgres"
+pgPassWord = "postgres"

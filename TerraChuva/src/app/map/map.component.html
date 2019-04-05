@@ -1,0 +1,238 @@
+<div class="wrapper" id="connected">
+    <!-- Sidebar Holder -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <div class="row">
+                <label class="search-box__label" for="search">
+                    <i class="search-box__icon material-icons">search</i>
+                </label>
+                <input class="search-box__input" id="search" type="text" placeholder="cidade, uf">
+            </div>
+            <div class="desctxt">
+                <h5><span class="amarelo">SMH</span><span class="verde">UI</span> </h5>
+                <div class="texto">Sistema de monitoramento Hidrometeorologico.</div>
+            </div>
+        </div>
+        <!-- ferramentas gerais -->
+        <div class="ferramentas">
+            <dfn data-info="Volte o mapa para a posição inicial">
+                <button type="button" class="btn"><i class="material-icons md-light">open_with</i></button>
+            </dfn>
+            <button type="button" class="btn"><i class="material-icons md-light md-inactive">feedback</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">explore</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">launch</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">cloud_download</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">add_box</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">undo</i></button>
+            <button type="button" class="btn"><i class="material-icons md-light">redo</i></button>
+        </div>
+
+        <div class = "layer custom-inputs" (click) = "setLayerType()">
+            <ul class = "list-unstyled components connected list">
+                <li *ngFor = "let layer of layers">
+                    <a href = "#camada-{{ layer.id }}" data-toggle = "collapse" aria-expanded = "false" class = "dropdown-toggle">
+                        <i class = "material-icons configura">settings</i> {{ layer.title }}
+                        <div class = "fontecamada">Fonte da Camada: {{ layer.fonte }}</div>
+                    </a>
+                    <div class = "material-switch pull-right">
+                        <p-inputSwitch [(ngModel)] = "layer.checked"></p-inputSwitch>
+                    </div>
+                    <ul class = "collapse list-unstyled" id = "camada-{{ layer.id }}">
+                        <li>
+                            <div class = "fe-camadas">
+                                <button type = "button" class = "btn" (click) = "activeLayer(layer.id)"><i class = "material-icons md-dark">swap_vert</i></button>
+                                <button type = "button" class = "btn" (click) = "visibleSidebar1 = true" (click) = "legenda(layer.name,layer.url)">
+                                    <i class = "material-icons md-dark">palette</i>
+                                </button>
+                                <button type = "button" class = "btn"><i class = "material-icons md-dark">add_location</i></button>
+                                <a href = "#collapseOpacity-{{ layer.id }}" data-toggle = "collapse" aria-expanded = "false">
+                                    <button type = "button" class = "btn">
+                                        <i class = "material-icons md-dark">brightness_6</i>
+                                    </button>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class = "collapse" id = "collapseOpacity-{{ layer.id }}">
+                        <div class = "card card-body card-opacity">
+                            <div class = "budget-wrap" (mouseup) = "setLayerType()">
+                                <p-slider [(ngModel)] = "layer.opacidade" [style] = "{'width':'14em'}"></p-slider>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <ul class="list-unstyled CTAs">
+            <li><a href="http://www.terrama2.dpi.inpe.br/" class="btn btn-primary btn-success">Projeto TerraMA2</a></li>
+        </ul>
+        <select id = "country-area" [(ngModel)] = "cartoDBNum" (click) = "setLayerDataDB()" class = "form-control" >
+            <option value="0" selected>0 ㎢</option>
+            <option value="5000">5000 ㎢</option>
+            <option value="10000">10000 ㎢</option>
+            <option value="50000">50000 ㎢</option>
+            <option value="100000">100000 ㎢</option>
+        </select>
+        <div id = "info" >&nbsp;</div>
+    </nav>
+
+    <!-- Menu superior -->
+    <div id="content">
+        <nav class="navbar navbar-expand-lg materialnav navbar-header">
+            <button class="btn btn-material navbar-btn " type="button" data-toggle="collapse" id="sidebarCollapse"
+                data-target="#navbar" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="material-icons menuicon">menu</i>
+            </button>
+            <a class="navbar-brand" href="#"><span class="amarelo">SMH-</span><span class="verde">UI</span></a>
+            <div class="collapse navbar-collapse justify-content-between">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="#">| Sistema de Monitoramento Hidrometeorológico</a>
+                </div>
+                <ul class="navbar-nav  navbar-right">
+                    <li class="nav-item dropdown analises">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Análises
+                        </a>
+                        <div class="dropdown-menu submenu" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="#">Desmatamento</a>
+                            <a class="dropdown-item" href="#">Alertas</a>
+                            <a class="dropdown-item" href="#">Uso e cobertura da terra</a>
+                        </div>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Sobre <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contato</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><img src="assets/img/br.svg" class="bandeira" alt="portugues"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><img src="assets/img/usa.svg" class="bandeira" alt="ingles"></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container-fluid mapa">
+            <div id = "form" [style.visibility] = "layers[1].checked ? 'visible' : 'hidden'" >
+                <!--<input type="text" [(ngModel)]="busca" placeholder="Busca">
+                <button type="submit" (click)="salvar()">Pesquisar</button>
+                <input type="text" [(ngModel)]="busca" placeholder="Busca">
+                <button type="submit" (click)="salvar()">Pesquisar</button></br>-->
+                <h6>Merge4km</h6>
+                <p-calendar
+                    [(ngModel)] = "layers[1].date"
+                    [minDate] = "minDate"
+                    [maxDate] = "maxDate"
+                    [readonlyInput]="true"
+                    dateFormat = "dd/mm/yy"
+                    [monthNavigator] = "true" 
+                    [yearNavigator] = "true" 
+                    yearRange = "1998:2019"
+                ></p-calendar>
+                <button type = "button" (click) = "setLayerTime()">Aplicar</button>
+            </div>
+            <div id = "form" [style.visibility] = "layers[5].checked ? 'visible' : 'hidden'" >
+                <!--<input type="text" [(ngModel)]="busca" placeholder="Busca">
+                <button type="submit" (click)="salvar()">Pesquisar</button>
+                <input type="text" [(ngModel)]="busca" placeholder="Busca">
+                <button type="submit" (click)="salvar()">Pesquisar</button></br>-->
+                <h6>Análise Merge4km</h6>
+                <p-calendar
+                    [(ngModel)] = "layers[5].date"
+                    [readonlyInput] = "true"
+                    dateFormat = "dd/mm/yy"
+                    [monthNavigator] = "true"
+                    [yearNavigator] = "true"
+                    yearRange = "1998:2000"
+                ></p-calendar>
+                <button type = "button" (click) = "setLayerTime()">Aplicar</button>
+            </div>
+            <div id = "form" [style.visibility] = "layers[6].checked ? 'visible' : 'hidden'" >
+                <h6>Prec4km Merge Daily</h6>
+                <p-calendar
+                    [(ngModel)] = "layers[6].date"
+                    [readonlyInput] = "true"
+                    dateFormat = "dd/mm"
+                    [monthNavigator] = "true"
+                    [yearNavigator] = "false"
+                ></p-calendar>
+                <button type = "button" (click) = "setLayerTime()">Aplicar</button>
+            </div>
+            <div id = "form" [style.visibility] = "layers[7].checked ? 'visible' : 'hidden'" >
+                <h6>Prec4km Merge Monthly</h6>
+                <input type = "number" min = "1" max = "12" [(ngModel)] = "mergeMonthlyDate" placeholder = "Mês">
+                <button type = "button" (click) = "setLayerMergeTime(7)">Aplicar</button>
+            </div>
+            <div id = "form" [style.visibility] = "layers[8].checked ? 'visible' : 'hidden'" >
+                <h6>Prec4km Merge Yearly</h6>
+                <input type = "number" min = "1998" max = "2018" [(ngModel)] = "mergeYearlyDate" placeholder = "Ano">
+                <button type = "button" (click) = "setLayerMergeTime(8)">Aplicar</button>
+            </div>
+            <div id = "form" [style.visibility] = "layers[2].checked ? 'visible' : 'hidden'">
+                <input type = "text" [(ngModel)] = "busca_PCD_id" placeholder = "PCD id">
+                <button type = "button" (click) = "getPCD()">Buscar</button>
+            </div>
+            <!-- <form>
+                <label> Precisão </label>
+                <input id = "precision" type = "number" min = "0" max = "12" value = "4"/>
+            </form> -->
+            <div id = "map" class = "map"></div>
+            <div id = "mouse-position"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Baselayers -->
+<div class="btnbaselayer">
+    <div class = "baselayer custom-radios" (click) = "setMapType()">
+        <i class="fa fa-clone"></i>
+        <ul>
+            <li class="icon">
+                <p-radioButton name = "osm" value = "osm" label = " Google Satelite " [(ngModel)] = "setMap" inputId = "preopt1"></p-radioButton>
+                <label for="radio1"><span></span></label>
+                <!-- <span class="text"></span> -->
+            </li>
+            <li class="icon">
+                <p-radioButton name = "GEBCO" value = "GEBCO" label=" GEBCO " [(ngModel)] = "setMap" inputId = "preopt2"></p-radioButton>
+                <label for="radio2"><span></span></label>
+                <!-- <span class="text">Google Hybrid</span> -->
+            </li>
+            <li class="icon">
+                <p-radioButton name = "Watercolor" value = "Watercolor" label = " Watercolor " [(ngModel)] = "setMap" inputId = "preopt3"></p-radioButton>
+                <label for="radio3"><span></span></label>
+                <!-- <span class="text">Google Streets</span> -->
+            </li>
+            <li class="icon">
+                <p-radioButton name = "Toner" value = "Toner" label = " Toner " [(ngModel)] = "setMap" inputId = "preopt4"></p-radioButton>
+                <label for="radio4"><span></span></label>
+                <!-- <span class="text">Google Terrain</span> -->
+            </li>
+            <li class="icon">
+                <p-radioButton name = "Terrain" value = "Terrain" label = " Terrain " [(ngModel)] = "setMap" inputId = "preopt5"></p-radioButton>
+                <label for="radio4"><span></span></label>
+                <!-- <span class="text">Google Terrain</span> -->
+            </li>
+            <li class="icon">
+                <p-radioButton name = "cartoDB" value = "cartoDB" label = " CartoDB " [(ngModel)] = "setMap" inputId = "preopt5"></p-radioButton>
+                <label for="radio4"><span></span></label>
+                <!-- <span class="text">Google Terrain</span> -->
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- fim -->
+<!--Footer-->
+<footer class="footer">
+    <p>© 2018<a href="#"> TerraBrasilis</a></p>
+</footer>
+<!--/.Footer-->
+
+<p-sidebar [(visible)] = "visibleSidebar1" position = "right" [baseZIndex] = "10000">
+    <h5 style = "font-weight:normal">Legenda</h5>
+    <div id = "legenda">&nbsp;</div>
+</p-sidebar>
