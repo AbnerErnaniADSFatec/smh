@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { PCD } from './map/points/pcd';
-import { PCDHistory } from './map/points/pcdhistory';
+import { Pcd } from './map/points/pcd';
+import { PcdHistory } from './map/points/pcd-history';
+import { Geotiff } from './map/rasters/geotiff';
+import { Observable } from 'rxjs';
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class PythonFlaskAPIService{
-  private localhost = 'http://localhost:';
+  private localhost = 'http://localhost:4863';
 
   public data_pcd: JSON;
   public pcd: JSON;
@@ -15,20 +19,44 @@ export class PythonFlaskAPIService{
   constructor( private httpClient: HttpClient ) {}
 
   getAllPCD(){
-    this.httpClient.get(this.localhost + '1524/pcd').subscribe(data => {
-      this.data_pcd = JSON.parse(JSON.parse(JSON.stringify(data)));
-    });
+    return this.httpClient.get<Pcd>(this.localhost + '/pcd');
   }
 
-  getPCDById( id: string ){
-    this.httpClient.get(this.localhost + "1524/pcd/" + id).subscribe(data => {
-      this.pcd = JSON.parse(JSON.stringify(data as JSON));
-    });
+  getPCDById(id: string): Observable<Pcd> {
+    return this.httpClient.get<Pcd>(this.localhost + '/pcd/' + id);
   }
 
   getPCDHistoryById( id: string ){
-    this.httpClient.get(this.localhost + "1524/pcd/" + id + "/history").subscribe(data => {
-      this.pcd_history = JSON.parse(JSON.parse(JSON.stringify(data as JSON)));
-    });
+    return this.httpClient.get<PcdHistory>(this.localhost + '/pcd/' + id + '/history');
+  }
+
+  getMergeDailyByDate( date: string ){
+    return this.httpClient.get<Geotiff>(this.localhost + '/merge_daily/' + date);
+  }
+
+  /*
+  async getMergeMonthlyByMonth( month: string ){
+    return await this.httpClient.get<Geotiff>(this.localhost + '/merge_monthly/' + month).toPromise();
+  }
+  */
+
+  getMergeMonthlyByMonth( month: string ){
+    return this.httpClient.get<Geotiff>(this.localhost + '/merge_monthly/' + month);
+  }
+
+  getMergeYearlyByYear( year: string ){
+    return this.httpClient.get<Geotiff>(this.localhost + '/merge_yearly/' + year);
+  }
+
+  getMergeYearly(){
+    return this.httpClient.get(this.localhost + '/merge_yearly');
+  }
+
+  getMergeMonthlyMean(){
+    return this.httpClient.get(this.localhost + '/merge_monthly_mean');
+  }
+
+  getMergeYearlyMean(){
+    return this.httpClient.get(this.localhost + '/merge_yearly_mean');
   }
 }

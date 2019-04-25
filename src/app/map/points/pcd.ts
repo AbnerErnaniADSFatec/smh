@@ -1,5 +1,5 @@
-export class PCD {
-    id: string;
+export interface Pcd {
+    id: number;
     alias: string;
     geom: string;
     table_name: string;

@@ -23,6 +23,7 @@ import {ChartModule} from 'primeng/chart';
 import {CalendarModule} from 'primeng/calendar';
 import {InputTextModule} from 'primeng/inputtext';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import { DropdownModule } from 'primeng/dropdown';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
     ChartModule,
     CalendarModule,
     InputTextModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    DropdownModule
   ],
   providers: [],
   bootstrap: [AppComponent]

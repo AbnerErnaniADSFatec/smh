@@ -25,8 +25,8 @@ a, a:hover, a:focus {
     transition: all 0.3s;
 }
 
-.verde { color: #96c964;}
-.amarelo { color: #f9c069;}
+.verde { color:  #000000;} /* #96c964 */
+.amarelo { color: #000000;} /* #f9c069 */
 
 /* ---------------------------------------------------
     Material Icons
@@ -47,8 +47,6 @@ text-shadow: #2a9a74 1px 1px 0;
 color: #fff !important;
 }
 
-
-
 /* ---------------------------------------------------
     Barra do Topo
 ----------------------------------------------------- */
@@ -57,7 +55,7 @@ color: #fff !important;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     align-items: center;
-    background-color: #00796b;
+    background-color: #f8b802;/* #00796b; */
     color: #fff !important;
     font-weight: 400;
     font-size: 16px;
@@ -69,7 +67,7 @@ color: #fff !important;
 
 .menuicon { margin-top: 8px; color: #fff;}
 
-.materialnav a {color: #fff !important;}
+.materialnav a {color: #000000;} /* #fff !important;} */
 
 .mapa { margin: 0px; padding: 0px;  }
 .mapaimg { z-index:-2; }
@@ -82,19 +80,19 @@ color: #fff !important;
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: #006950;
-    border-color: #108d6f;
+    background-color: hsl(46, 100%, 50%);/*#006950;*/
+    border-color: hsl(46, 100%, 50%);/*#108d6f;*/
     box-shadow: none;
     outline: none;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #108d6f;
-    border-color: #108d6f;
+    background-color: #f8b802;/*#108d6f;*/
+    border-color: #f8b802;/*#108d6f;*/
 }
 
-.ferramentas { padding: 10px; background-color: #49bc95; color: #fff;}
+.ferramentas { padding: 10px; background-color: #dab142; color: #fff;} /*  49bc95*/
 .ferramentas div { margin-right: 4px !important;}
 .ferramentas .btn { background-color:transparent; border: 0px; padding: 0px; margin-right: 3px; margin-left: 2px;}
 .ferramentas .btn i:hover {color: rgba(255, 255, 255, 0.5);}
@@ -178,7 +176,7 @@ dfn::after {
   position: absolute;
   top: 22px; left: 0;
   opacity: 0;
-  width: 230px;
+  /* width: 230px; */
   font-size: 13px;
   line-height: 1.5em;
   padding: 0.5em 0.8em;
@@ -242,16 +240,16 @@ dfn:hover::before {top: 20px;}
 #sidebar .sidebar-header {
     padding: 4px 20px 4px 20px;
 	background-image:url(../img/i-mapa.jpg);
-    /**background: #6d7fcc;*/
+    background: #f8b802;/* #6d7fcc; */
 	color: #119789;
 	height: 200px;
 }
 
-.descricao { top: 50px !important; color: #fff;
+.descricao { top: 50px !important; color: rgb(0, 0, 0);
 }
 
-.desctxt {font-size:13px; margin-top: 90px;
-	color:#fff; line-height: 15px; text-align: center;}
+.desctxt {font-size:13px; margin-top: 50px;
+	color:rgb(0, 0, 0); line-height: 15px; text-align: center;}
 
 #sidebar ul.components {
     padding: 0px 0;
@@ -347,7 +345,7 @@ a[data-toggle="collapse"] {
     font-size: 11px;
 	top:-5px;
 	margin-left: 36px;
-    color: #14757e !important;
+    color: /* #14757e */ #000000 !important;
 }
 
 .configura {position: relative;
@@ -569,14 +567,13 @@ a[data-toggle="collapse"] {
 
 
 .material-switch > input[type="checkbox"]:checked + label::before {
-    background: #328268 !important;
+    background: /* #328268 */ #f8b802 !important;
     opacity: 0.6 !important;
 }
 .material-switch > input[type="checkbox"]:checked + label::after {
     background: #90dd8a; /* Cor ativa ou usar classe bg do bootstrap*/
     left: 20px;
 }
-
 
 /*----------------------------------------------------------
  Busca
@@ -590,7 +587,7 @@ a[data-toggle="collapse"] {
   line-height: 64px;
   outline: none;
   border: none;
-  border-bottom: 2px solid #fd5c79;
+  border-bottom: 2px solid #7e5c01; /* #fd5c79; */
   background: none;
   color: #757575 !important;
 }
@@ -674,7 +671,7 @@ background: #707070;
 ---------------------------------------------------------*/	
 
 footer{
-    background-color: #00796b;
+    background-color: #f8b802;/* #00796b; */
 	position:fixed;
 	bottom: 0;
     left: 0;
@@ -780,7 +777,7 @@ footer{
 }
 .baselayer ul li:hover .text {
     font-weight:bold;
-    color:#007b5e;
+    color: #f8b802;/* #007b5e; */
 }
 
 

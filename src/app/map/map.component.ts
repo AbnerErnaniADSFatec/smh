@@ -8,6 +8,7 @@ import FullScreen from 'ol/control/FullScreen';
 import DragRotateAndZoom from 'ol/interaction/DragRotateAndZoom';
 import DragAndDrop from 'ol/interaction/DragAndDrop';
 import GeoJSON from 'ol/format/GeoJSON';
+import * as olProj from 'ol/proj';
 // Classes criadas
 import { BaseLayers } from './base-layers/base-layers';
 import { Layer } from './tile-layers/layer';
@@ -15,6 +16,13 @@ import { Layer } from './tile-layers/layer';
 // Serviços Criados
 import { MapService } from 'src/app/map.service';
 import { PythonFlaskAPIService } from 'src/app/python-flask-api.service';
+
+// Interfaces Criadas
+import { Pcd } from './points/pcd';
+import { PcdHistory } from './points/pcd-history';
+import { Geotiff } from './rasters/geotiff';
+import { City } from './entities/city';
+import { async } from '@angular/core/testing';
 
 @Component({
   selector: 'app-map',
@@ -28,18 +36,21 @@ export class MapComponent implements OnInit {
   private geoserverQueimada = 'http://queimadas.dgi.inpe.br/queimadas/geoserver/wms?';
   private geoserver20Chuva = 'http://www.terrama2.dpi.inpe.br/chuva/geoserver/wms?';
 
-  visibleSidebar1;
   private map;
   private baseLayers = new BaseLayers();
+  private layers = []
   private features = []
 
-
   private busca_PCD_id;
-  private data_pcd;
+
+  private cities: City[];
+  private selectedCity: City;
+
+  private dataGrafico: any;
 
   value: number = 0;
   testep: boolean = false;
-  setMap: string = 'GEBCO';
+  setMap: string = 'osm';
   mergeDailyDate: number = 1;
   mergeMonthlyDate: number = 1;
   mergeYearlyDate: number = 1998;
@@ -48,39 +59,115 @@ export class MapComponent implements OnInit {
   maxDate: Date;
   invalidDates: Array<Date>;
 
-  private layers = [
-    new Layer(6, "Estados Brasil Político", "OBT DPI", 'terrama2_10:view10', '4674', this.geoserver20Chuva),
-    new Layer(7, "Preciptação", "OBT DPI", 'terrama2_3:view3','4326', this.geoserver20Chuva),
-    new Layer(8, "PCD's", "Local", 'terrama2_3:view3', '4326', this.geoserverTerraMaLocal),
-    new Layer(9, "Divisão dos Estados", "Cemaden", 'cemaden_dev:br_estados', '4326', this.geoserverCemaden),
-    new Layer(10, "Queimadas", "BD Queimadas", 'bdqueimadas:focos', '4326', this.geoserverQueimada),
-    new Layer(11, "Análise", "OBT DPI", 'terrama2_11:view11', '4326', this.geoserver20Chuva),
-    new Layer(12, "Prec4km Merge Daily", "Local", 'terrama2_21:view21', '4326', this.geoserverTerraMaLocal),
-    new Layer(13, "Prec4km Merge Monthy", "Local", 'terrama2_23:view23', '4326', this.geoserverTerraMaLocal),
-    new Layer(14, "Prec4km Merge Yearly", "Local", 'terrama2_22:view22', '4326', this.geoserverTerraMaLocal)
-  ];
-
   // Banco de dados
   private cartoDBNum: number;
+
+  private media = 0;
 
   constructor(private mapService: MapService, private apiFlask: PythonFlaskAPIService) { }
 
   ngOnInit() {
-    this.initilizeMap();
+    this.initDadosGrafico();
+    this.initDate();
+    this.initLayers();
+    this.initCity();
     this.initilizeJson();
+    this.initilizeMap();
+  }
 
+  initDadosGrafico() {
+    this.apiFlask.getMergeMonthlyMean().subscribe( data => {
+      let values = [];
+      for ( let i = 0; i < 12; i++ ){
+        values[i] = data[i + 1];
+      }
+      console.log(values);
+      this.dataGrafico = {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July','August','September','October','November','December'],
+        datasets: [
+          {
+            label: 'Média Acumulado Mensal',
+            backgroundColor:'#f8da86',
+            borderColor: '#f8b802',
+            data: values
+          }
+        ]
+      }
+    });
+    this.apiFlask.getMergeYearlyMean().subscribe( data => {
+      let values = [];
+      let years = []
+      for ( let i = 0; i <= 20; i++ ){
+        years[i] = (1998 + i).toString();
+        values[i] = data[1998 + i];
+      }
+      console.log(values);
+      this.dataGrafico = {
+        labels: years,
+        datasets: [
+          {
+            label: 'Média Acumulado Anual',
+            backgroundColor:'#f8da86',
+            borderColor: '#f8b802',
+            data: values
+          }
+        ]
+      }
+    });
+    this.dataGrafico = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      datasets: [
+        {
+          label: 'My First dataset',
+          backgroundColor:'#f8da86',
+          borderColor: '#f8b802',
+          data: [0.98, 0.5, 0.2, 0.3, 0.4, 0.6, 0.6]
+        },
+        {
+          label: 'My Second dataset',
+          backgroundColor: '#f0b97b',
+          borderColor: '#f07f00',
+          data: [0.1, 0.9, 0.67, 0.89, 0.78, 0.545, 0.9]
+        }
+      ]
+    }
+  }
+
+  initDate() {
     let today = new Date();
     this.minDate = new Date();
     this.minDate.setDate(2);
     this.minDate.setMonth(0);
     this.minDate.setFullYear(1998);
-
     this.maxDate = new Date();
     this.maxDate.setDate(31);
     this.maxDate.setMonth(0);
     this.maxDate.setFullYear(2019);
-
     this.invalidDates = [this.minDate, today];
+  }
+
+  initLayers() {
+    this.layers = [
+      new Layer(6, "Estados Brasil Político", "OBT DPI", 'terrama2_10:view10', '4674', this.geoserver20Chuva),
+      new Layer(7, "Preciptação", "OBT DPI", 'terrama2_3:view3','4326', this.geoserver20Chuva),
+      new Layer(8, "PCD's", "Local", 'terrama2_3:view3', '4326', this.geoserverTerraMaLocal),
+      new Layer(9, "Divisão dos Estados", "Cemaden", 'cemaden_dev:br_estados', '4326', this.geoserverCemaden),
+      new Layer(10, "Queimadas", "BD Queimadas", 'bdqueimadas:focos', '4326', this.geoserverQueimada),
+      new Layer(11, "Análise", "OBT DPI", 'terrama2_11:view11', '4326', this.geoserver20Chuva),
+      new Layer(12, "Prec4km Merge Daily", "Local", 'terrama2_46:view46', '4326', this.geoserverTerraMaLocal),
+      new Layer(13, "Prec4km Merge Monthy", "Local", 'terrama2_23:view23', '4326', this.geoserverTerraMaLocal),
+      new Layer(14, "Prec4km Merge Yearly", "Local", 'terrama2_26:view26', '4326', this.geoserverTerraMaLocal)
+    ];
+  }
+
+  initCity() {
+    this.cities = [
+      {name: 'Lorena', code: '1230', lat:-45.146517200, long:-22.7309943000},
+      {name: 'Guara', code: '2142', lat:-22.792237, long:-45.2387576},
+      {name: 'SJC', code: '4582', lat:-45.9332243, long:-23.1894907},
+      {name: 'PINDA', code: '896', lat:321321, long:46546},
+      {name: 'SEILA', code: '3444', lat:321321, long:46546}
+    ]
   }
 
   initilizeMap() {
@@ -114,19 +201,21 @@ export class MapComponent implements OnInit {
       zoom: 4
     });
 
-    var tileLayers = []
-    for( let ind in this.layers ){ tileLayers[ind] = this.layers[ind].getTileLayer() }
-    this.features = this.baseLayers.getBaseLayers().concat(tileLayers);
-
     this.map = new Map({
       controls: defaultControls().extend([mousePositionControl, new FullScreen(), new DragRotateAndZoom(), new DragAndDrop()], new ScaleLine({units: 'degrees'})),
-      layers: this.features /**  baseLayers.getBaseLayers()*/,
+      layers: this.features /**  baseLayers.getBaseLayers() */,
       target: 'map',
       view: viewMap
     });
 
+    /**
+    this.map.updateSize();
+    let evt = this.map;
+    window.onresize = function(){ evt.updateSize(); }
+    */
+
     this.map.on('click', function(event){
-      this.mouseCoordinate = event.coordinate; // olProj.transform(event.coordinate, 'EPSG:3857', 'EPSG:4326');
+      this.mouseCoordinate = olProj.transform(event.coordinate, 'EPSG:3857', 'EPSG:4326');
       console.log("4326 Lat: " + this.mouseCoordinate[0] + " Long: " + this.mouseCoordinate[1]);
     });
 
@@ -165,9 +254,13 @@ export class MapComponent implements OnInit {
     function changeMap() {
       console.log('name');
     }
+    this.baseLayers.setBaseLayers(this.setMap);
   }
 
   initilizeJson() {
+    var tileLayers = []
+    for( let ind in this.layers ){ tileLayers[ind] = this.layers[ind].getTileLayer() }
+    this.features = this.baseLayers.getBaseLayers().concat(tileLayers);
   }
 
   private setLayerType(){
@@ -184,13 +277,22 @@ export class MapComponent implements OnInit {
       var year = layer.date.getFullYear();
       layer.getTileLayer().getSource().updateParams({'TIME': year + '-' + month + '-' + day}); /** '2019-01-05'}); */
     }
+    this.apiFlask.getMergeYearlyByYear(this.mergeYearlyDate.toString()).subscribe( (data: Geotiff) => {
+      console.log(data);
+    });
   }
 
   private setLayerMergeTime(index:number){
     if (index === 7) {
       this.layers[7].getTileLayer().getSource().updateParams({'TIME' : '1998-' + this.mergeMonthlyDate.toString() + '-02'});
+      this.apiFlask.getMergeMonthlyByMonth(this.mergeMonthlyDate.toString()).subscribe( (data: Geotiff) => {
+        console.log(data);
+      })
     } else {
       this.layers[8].getTileLayer().getSource().updateParams({'TIME': this.mergeYearlyDate.toString() + '-01-02'});
+      this.apiFlask.getMergeYearlyByYear(this.mergeYearlyDate.toString()).subscribe( (data: Geotiff) => {
+        console.log(data);
+      });
     }
   }
 
@@ -226,7 +328,32 @@ export class MapComponent implements OnInit {
   }
 
   private getPCD(){
-     console.log("pcd");
+    /**
+    this.apiFlask.getPCDById(this.busca_PCD_id).subscribe((data: Pcd ) => {
+      console.log(data);
+    });
+    */
+    this.apiFlask.getAllPCD().subscribe( (data: Pcd) => {
+      console.log(data);
+    });
+    /**
+    this.apiFlask.getPCDHistoryById(this.busca_PCD_id).subscribe((data: PcdHistory) => {
+      console.log(data);
+    }); */
+  }
+
+  private setViewMap() {
+    this.map.setView(new View({
+      // center: [-6124801.2015823, -1780692.0106836], zoom: 9
+      center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11, projection: 'EPSG:4326'
+      //  center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11
+    }));
+  }
+
+  private printYearly(){
+    this.apiFlask.getMergeYearly().subscribe( data => {
+      console.log(data);
+    });
   }
 
   activeLayer(index){
