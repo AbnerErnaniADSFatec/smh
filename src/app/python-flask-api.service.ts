@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Pcd } from './map/points/pcd';
 import { PcdHistory } from './map/points/pcd-history';
 import { Geotiff } from './map/rasters/geotiff';
+import { AnaliseGeotiff } from './map/rasters/analise-geotiff';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -48,15 +49,15 @@ export class PythonFlaskAPIService{
     return this.httpClient.get<Geotiff>(this.localhost + '/merge_yearly/' + year);
   }
 
-  getMergeYearly(){
-    return this.httpClient.get(this.localhost + '/merge_yearly');
-  }
-
   getMergeMonthlyMean(){
     return this.httpClient.get(this.localhost + '/merge_monthly_mean');
   }
 
   getMergeYearlyMean(){
     return this.httpClient.get(this.localhost + '/merge_yearly_mean');
+  }
+
+  getMergeMonthlyMaxMean(geocodigo: string){
+    return this.httpClient.get<AnaliseGeotiff>(this.localhost + '/an_merge_monthly/' + geocodigo);
   }
 }
