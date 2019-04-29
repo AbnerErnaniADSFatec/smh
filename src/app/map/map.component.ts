@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { toArray } from 'rxjs/operators';
 import Map from 'ol/Map';
 import {defaults as defaultControls, ScaleLine} from 'ol/control.js';
 import MousePosition from 'ol/control/MousePosition.js';
@@ -21,6 +22,7 @@ import { PythonFlaskAPIService } from 'src/app/python-flask-api.service';
 import { Pcd } from './points/pcd';
 import { PcdHistory } from './points/pcd-history';
 import { Geotiff } from './rasters/geotiff';
+import { AnaliseGeotiff } from './rasters/analise-geotiff';
 import { City } from './entities/city';
 import { async } from '@angular/core/testing';
 
@@ -76,6 +78,7 @@ export class MapComponent implements OnInit {
   }
 
   initDadosGrafico() {
+    /*
     this.apiFlask.getMergeMonthlyMean().subscribe( data => {
       let values = [];
       for ( let i = 0; i < 12; i++ ){
@@ -96,7 +99,7 @@ export class MapComponent implements OnInit {
     });
     this.apiFlask.getMergeYearlyMean().subscribe( data => {
       let values = [];
-      let years = []
+      let years = [];
       for ( let i = 0; i <= 20; i++ ){
         years[i] = (1998 + i).toString();
         values[i] = data[1998 + i];
@@ -131,6 +134,20 @@ export class MapComponent implements OnInit {
         }
       ]
     }
+    */
+    this.apiFlask.getMergeMonthlyMaxMean("3549904").subscribe( (data: AnaliseGeotiff) => {
+      this.dataGrafico = {
+        labels: toArray<number>(),
+        datasets: [
+          {
+            label: 'Média Acumulado Anual',
+            backgroundColor:'#f8da86',
+            borderColor: '#f8b802',
+            data: []
+          }
+        ]
+      };
+    });
   }
 
   initDate() {
@@ -348,12 +365,6 @@ export class MapComponent implements OnInit {
       center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11, projection: 'EPSG:4326'
       //  center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11
     }));
-  }
-
-  private printYearly(){
-    this.apiFlask.getMergeYearly().subscribe( data => {
-      console.log(data);
-    });
   }
 
   activeLayer(index){
