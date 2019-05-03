@@ -34,7 +34,7 @@ def hello():
 class PCD(Resource):
     def get(self):
         try:
-            conectar = Connection_pg()
+            conectar = Connection_pg("terrama2")
             data = conectar.load_data("SELECT * FROM public.dcp_series_24")
             return jsonify(data.to_dict())
         except:
@@ -43,7 +43,7 @@ class PCD(Resource):
 class PCD_info(Resource):
     def get(self, id):
         try:
-            conectar = Connection_pg()
+            conectar = Connection_pg("terrama2")
             data = conectar.load_data("SELECT * FROM public.dcp_series_24 WHERE id={}".format(str(id)))
             pcd = {
                 "id" : str(data["id"][0]),
@@ -59,7 +59,7 @@ class PCD_info(Resource):
 class PCD_history(Resource):
     def get(self, id):
         try:
-            conectar = Connection_pg()
+            conectar = Connection_pg("terrama2")
             data = conectar.load_data("SELECT table_name FROM public.dcp_series_24 WHERE id={}".format(str(id)))
             history = conectar.load_data("SELECT * FROM public.{}".format(str(data["table_name"][0])))
             return jsonify(history.to_dict())
@@ -132,12 +132,51 @@ class Merge_Yearly_Mean(Resource):
 class MergeYearly(Resource):
     def get(self):
         try:
-            conectar = Connection_pg()
-            data = conectar.load_data("SELECT * FROM public.acumulado_merge_yearly_unique")
-            print(data)
+            conectar = Connection_pg("merge_monthly")
+            data = conectar.load_data("SELECT * FROM public.an_munc_merge_yearly WHERE maxima IS NOT NULL AND media IS NOT NULL")
             return jsonify(data.to_dict())
         except:
             return jsonify({ 'info' : 'Impossivel ler acumulado anual' })
+
+class An_Merge_Monthly(Resource):
+    def get(self, geocodigo):
+        try:
+            conectar = Connection_pg("merge_monthly")
+            data = conectar.load_data(
+                "SELECT nome_municipio, maxima, media, mes FROM public.an_munc_merge_monthly " + 
+                "WHERE geocodigo='{}' ".format(str(geocodigo)) +
+                "AND media IS NOT NULL AND maxima IS NOT NULL"
+            )
+            print(data)
+            return jsonify(data.to_dict())
+        except:
+            return jsonify({ 'info' : 'Impossível ler o geocodigo {}'.format(str(geocodigo)) })
+
+class CitiesByState(Resource):
+    def get(self, uf):
+        try:
+            conectar = Connection_pg("merge_monthly")
+            data = conectar.load_data("SELECT nome1, geocodigo FROM public.municipios_brasil WHERE uf='{}'".format(str(uf).upper()))
+            return jsonify(data.to_dict())
+        except:
+            return jsonify({ 'info' : 'uf {} não existe'.format(str(uf).upper()) })
+
+# dic = {
+#     'caminho' : ['prec4km_01.tif', 'prec4km_02.tif'],
+#     'id' : [1,2]
+# }
+# conectar.save_data("geotiff", pd.DataFrame(data = dic))
+
+class States(Resource):
+    def get(self):
+        try:
+            conectar = Connection_pg("merge_monthly")
+            # data = pd.DataFrame(data = { 'uf' : list(set(conectar.load_data("SELECT uf FROM public.municipios_brasil")["uf"])) })
+            data = pd.DataFrame(data = { 'estado' : open('states.txt', 'r').read().split('\n'), 'uf' : open('states-sigla.txt', 'r').read().split('\n') })
+            # states = open('states.txt', 'r').read().split('\n')
+            return jsonify(data.to_dict())
+        except:
+            return jsonify({ 'info' : 'Impossível fazer a leitura'})
 
 api.add_resource(PCD, '/pcd')
 api.add_resource(PCD_info, '/pcd/<id>')
@@ -148,6 +187,9 @@ api.add_resource(Merge_Yearly, '/merge_yearly/<date>')
 api.add_resource(MergeYearly, '/merge_yearly')
 api.add_resource(Merge_Monthly_Mean, '/merge_monthly_mean')
 api.add_resource(Merge_Yearly_Mean, '/merge_yearly_mean')
+api.add_resource(An_Merge_Monthly, '/an_merge_monthly/<geocodigo>')
+api.add_resource(CitiesByState, '/cities/<uf>')
+api.add_resource(States, '/states/')
 
 if __name__ == '__main__':
     app.run( port = 4863 )
