@@ -10,6 +10,7 @@ import DragRotateAndZoom from 'ol/interaction/DragRotateAndZoom';
 import DragAndDrop from 'ol/interaction/DragAndDrop';
 import GeoJSON from 'ol/format/GeoJSON';
 import * as olProj from 'ol/proj';
+
 // Classes criadas
 import { BaseLayers } from './base-layers/base-layers';
 import { Layer } from './tile-layers/layer';
@@ -25,6 +26,11 @@ import { Geotiff } from './rasters/geotiff';
 import { AnaliseGeotiff } from './rasters/analise-geotiff';
 import { City } from './entities/city';
 import { async } from '@angular/core/testing';
+import { CityByState } from './entities/city-by-state';
+import { CityByStateUnique } from './entities/city-by-state-unique';
+import { State } from './entities/state';
+import { StateUnique } from './entities/state-unique';
+import { initDomAdapter } from '@angular/platform-browser/src/browser';
 
 @Component({
   selector: 'app-map',
@@ -50,6 +56,20 @@ export class MapComponent implements OnInit {
 
   private dataGrafico: any;
 
+  // Busca de cidades via codigo no python API
+  private citySelectedAPI: CityByStateUnique;
+  private ufSelectedAPI: StateUnique;
+  private ufsAPI: StateUnique[] = [ { estado : 'São Paulo', uf : 'SP' }, { estado : 'Bahia', uf : 'BA' } ];
+  /** RS || 4301602 => Bagé */
+  private citiesAPI: CityByStateUnique[] = [ 
+    { nome1 : "São José dos Campos SP", geocodigo : "3549904" }, 
+    { nome1 : "Santa Branca", geocodigo : "3546009" },
+    { nome1 : "Baixa Grande do Ribeiro PI", geocodigo : "2201150" },
+    { nome1 : "Manaus AM", geocodigo : "1302603" },
+    { nome1 : "Recife PE", geocodigo : "2611606" },
+    { nome1 : "Bagé RS", geocodigo : "4301602" }
+  ];
+
   value: number = 0;
   testep: boolean = false;
   setMap: string = 'osm';
@@ -69,10 +89,11 @@ export class MapComponent implements OnInit {
   constructor(private mapService: MapService, private apiFlask: PythonFlaskAPIService) { }
 
   ngOnInit() {
-    this.initDadosGrafico();
+    // this.initDadosGrafico();
     this.initDate();
     this.initLayers();
     this.initCity();
+    this.initState();
     this.initilizeJson();
     this.initilizeMap();
   }
@@ -133,17 +154,23 @@ export class MapComponent implements OnInit {
           data: [0.1, 0.9, 0.67, 0.89, 0.78, 0.545, 0.9]
         }
       ]
-    }
-    */
-    this.apiFlask.getMergeMonthlyMaxMean("3549904").subscribe( (data: AnaliseGeotiff) => {
+    }*/
+    console.log(this.citySelectedAPI);
+    this.apiFlask.getMergeMonthlyMaxMean(this.citySelectedAPI.geocodigo).subscribe( (data: AnaliseGeotiff) => {
       this.dataGrafico = {
-        labels: toArray<number>(),
+        labels: this.apiFlask.convertToArray(data.mes),
         datasets: [
           {
-            label: 'Média Acumulado Anual',
+            label: 'Média Acumulado Mensal da Cidade de ' + this.apiFlask.convertToArray(data.nome_municipio)[0].toString(),
             backgroundColor:'#f8da86',
             borderColor: '#f8b802',
-            data: []
+            data: this.apiFlask.convertToArray(data.media)
+          },
+          {
+            label: 'Máxima Acumulado Mensal da Cidade de ' + this.apiFlask.convertToArray(data.nome_municipio)[0].toString(),
+            backgroundColor: '#f0b97b',
+            borderColor: '#f07f00',
+            data: this.apiFlask.convertToArray(data.maxima)
           }
         ]
       };
@@ -185,6 +212,13 @@ export class MapComponent implements OnInit {
       {name: 'PINDA', code: '896', lat:321321, long:46546},
       {name: 'SEILA', code: '3444', lat:321321, long:46546}
     ]
+  }
+
+  initState(){
+    this.apiFlask.getStates().subscribe( (data:State) => {
+      this.ufsAPI = this.apiFlask.convertToStateAPI(this.apiFlask.convertToArray(data.estado),this.apiFlask.convertToArray(data.uf));
+    });
+    console.log(this.ufsAPI);
   }
 
   initilizeMap() {
@@ -365,6 +399,19 @@ export class MapComponent implements OnInit {
       center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11, projection: 'EPSG:4326'
       //  center: [this.selectedCity.lat, this.selectedCity.long], zoom: 11
     }));
+  }
+
+  private configSelectDataGrafico(){
+    console.log(this.ufSelectedAPI.uf);
+    this.citiesAPI = [];
+    this.apiFlask.getCities(this.ufSelectedAPI.uf).subscribe( (data: CityByState) => {
+      this.citiesAPI = this.apiFlask.convertToCityAPI(this.apiFlask.convertToArray(data.nome1),this.apiFlask.convertToArray(data.geocodigo));
+    });
+    console.log(this.citiesAPI);
+  }
+
+  private buscaDataGrafico(){
+    console.log(this.citiesAPI);
   }
 
   activeLayer(index){
