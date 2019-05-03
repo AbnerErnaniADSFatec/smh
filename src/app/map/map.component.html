@@ -27,6 +27,8 @@
             <button type="button" class="btn"><i class="material-icons md-light">redo</i></button> -->
         </div>
 
+        <!-- Dados Estáticos -->
+
         <div class = "layer custom-inputs" (click) = "setLayerType()">
             <ul class = "list-unstyled components connected list">
                 <li *ngFor = "let layer of layers">
@@ -65,6 +67,10 @@
                 </li>
             </ul>
         </div>
+
+        <div class="ferramentas"></div>
+
+        <!-- Dados Dinâmicos -->
 
         <ul class="list-unstyled CTAs">
             <li><a href="http://www.terrama2.dpi.inpe.br/" class="btn btn-primary btn-success">Projeto TerraMA2</a></li>
@@ -245,9 +251,10 @@
 <p-sidebar [(visible)] = "filtro_sidebar" position = "right" [baseZIndex] = "10000">
     <h5 style = "font-weight:normal">Filtro</h5>
     <p-dropdown [options] = "cities" [(ngModel)] = "selectedCity" placeholder = "Select a Cidade" optionLabel = "name" [showClear] = "true"></p-dropdown>
-        <p>
+    <p>
         <button pButton type = "button"  (click) = "setViewMap()" label = "Buscar" class = "ui-button-success"></button>
         <button pButton type = "button" (click) = "filtro_sidebar = false" label = "Fechar" class = "ui-button-secondary"></button>
+    </p>
 </p-sidebar>
 
 <p-sidebar [(visible)] = "analise_bar" [fullScreen]="true" [baseZIndex]="10000">
@@ -259,29 +266,45 @@
     </div>
     <div class="ui-g-2">
         <p-calendar [(ngModel)]="date3" [showIcon]="true"></p-calendar>
-        </div>
-        <div class="ui-g-2">
+    </div>
+        <!-- <div class="ui-g-2">
             <span class="ui-float-label">
                 <input id="float-input" type="text" size="30" pInputText> 
                 <label for="float-input">Metadados</label>
             </span>
-        </div>
+        </div> -->
         <div class="ui-g-2">
             <span class="ui-float-label">
-                <input id="float-input2" type="text" size="30" pInputText> 
+                <p-dropdown [options] = "ufsAPI" (onChange) = "configSelectDataGrafico()" [(ngModel)] = "ufSelectedAPI" placeholder = "Select a State" optionLabel = "estado" [showClear] = "true" [filter] = "true"></p-dropdown>
+                <!-- <select [(ngModel)] = "ufSelectedAPI" (ngModelChange) = "configSelectDataGrafico()">  
+                        <option *ngFor = "let state of ufsAPI"> {{ state.uf }} </option>
+                </select> -->
+            </span>
+        </div>
+        <!-- <div class="ui-g-2">
+            <span class="ui-float-label">
+                <input id="float-input2" type="text" size="30" pInputText>
                 <label for="float-input2">Machine Leaning</label>
+            </span>
+        </div> -->
+        <div class="ui-g-2">
+            <span class="ui-float-label">
+                <p-dropdown [options] = "citiesAPI" (onChange) = "initDadosGrafico()" [(ngModel)] = "citySelectedAPI" placeholder = "Select a City" optionLabel = "nome1" [showClear] = "true" [filter] = "true"></p-dropdown>
+                <!-- <select [(ngModel)] = "citySelectedAPI" (ngModelChange) = "initDadosGrafico()">  
+                        <option *ngFor = "let city of citiesAPI"> {{ city.nome1 }} </option>
+                </select> -->
             </span>
         </div>
         <div class="ui-g-2"></div>
         <div class="ui-g-2">
-            <button pButton type="button"  label="Buscar" class="ui-button-success"></button>
-            <button pButton type="button" (click)="visibleSidebar5 = false" label="Fechar" class="ui-button-secondary"></button>
+            <button pButton type="button" (click) = "buscaDataGrafico()" label="Buscar" class="ui-button-success"></button>
+            <button pButton type="button" (click) = "visibleSidebar5 = false" label="Fechar" class="ui-button-secondary"></button>
         </div>
     </div>
     <!-- Grafico barra -->
-    <p-chart type="bar" height="350" [data]="dataGrafico"></p-chart>
-    <p-chart type="line" height="350" [data]="dataGrafico" (onDataSelect)="selectData($event)"></p-chart>
+    <p-chart type = "bar" height = "500" [data] = "dataGrafico"></p-chart>
+    <!-- <p-chart type="line" height="350" [data]="dataGrafico" (onDataSelect)="selectData($event)"></p-chart>-->
     <!-- fim do grafico de barra  -->
     <!-- <p-progressBar [value]="value"></p-progressBar> -->
-    <p-progressBar mode="indeterminate" [style]="{'height': '6px'}"></p-progressBar>
+    <!-- <p-progressBar mode="indeterminate" [style]="{'height': '6px'}"></p-progressBar> -->
 </p-sidebar>
